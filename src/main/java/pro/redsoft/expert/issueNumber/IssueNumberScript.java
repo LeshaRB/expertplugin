@@ -1,57 +1,43 @@
 package pro.redsoft.expert.issueNumber;
 
 import org.elasticsearch.common.Nullable;
+import org.elasticsearch.index.fielddata.ScriptDocValues;
 import org.elasticsearch.script.AbstractSearchScript;
+import pro.redsoft.expert.utils.Utils;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by Labotsky Alexey on 11/19/15. lesharb@gmail.com
  */
 public class IssueNumberScript extends AbstractSearchScript {
 
-  private String issueNumber;
-  private Long issueDate;
-  private Long updateDate;
+  private static Logger logger = Logger.getLogger(IssueNumberScript.class.getSimpleName());
+
+  private NumberPart numberPart;
 
   public IssueNumberScript(@Nullable Map params) {
-    issueNumber = (String) params.get("sIssueNumber");
-    issueDate = (Long) params.get("sIssueDate");
-    updateDate = (Long) params.get("sUpdateDate");
   }
 
   @Override
   public Object run() {
-    return null;
-  }
+    ScriptDocValues.Strings issueNumber = (ScriptDocValues.Strings) doc().get("sIssueNumber");
+    numberPart = Utils.parseNumber(issueNumber);
 
-  // Числовая часть по умолчанию
-  private final String NUM_PART = "1000000";
+    ScriptDocValues.Longs issueDate = (ScriptDocValues.Longs) doc().get("sIssueDate");
+    ScriptDocValues.Longs updateDate = (ScriptDocValues.Longs) doc().get("sUpdateDate");
 
-  // Числовая часть для номеров, у которых ее нет (hack)
-  private final String NUM_PART_WITHOUT_NUMBER = "999999";
+    // logger.info("size = " +fields().size());
+    // logger.info(
+    // "num = " + issueNumber + "part1 = " + numberPart.getFirstPart() + " part2 = " + numberPart.getSecondPart());
 
-  class NumberPart {
-    String firstPart;
-    String secondPart;
+    // logger.info("size = "+source().size());
+    StringBuilder sb = new StringBuilder().append(numberPart.getFirstPart()).append("_")
+        .append(numberPart.getSecondPart()).append("_").append(String.valueOf(issueDate)).append("_")
+        .append(String.valueOf(updateDate));
 
-    public NumberPart(String firstPart, String secondPart) {
-      this.firstPart = firstPart;
-      this.secondPart = secondPart;
-    }
-
-    public Integer getFirstPart() {
-      return Integer.parseInt(firstPart);
-    }
-
-    public String getSecondPart() {
-      return secondPart;
-    }
-
-  }
-
-  private Integer getIntNUM_PART() {
-    return Integer.parseInt(NUM_PART);
+    return sb.toString();
   }
 
   // private int checkDates(DocumentBean o1, DocumentBean o2) {
@@ -88,29 +74,4 @@ public class IssueNumberScript extends AbstractSearchScript {
   //
   // }
 
-  private NumberPart parseNumber(String number) {
-    // Проверяем на "безномерность"
-    if (number != null) {
-      String formatString = number.trim();
-      if (formatString.equals("") || formatString.equals("-") || formatString.equals("б/н"))
-        return new NumberPart(NUM_PART, "");
-      else {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < number.length(); i++) {
-          if (Character.isDigit(number.charAt(i)))
-            sb.append(number.charAt(i));
-          else
-            break;
-        }
-        String firstPart = sb.toString();
-        String secondPart = number.replaceFirst(firstPart, "");
-
-        if (firstPart.isEmpty())
-          firstPart = NUM_PART_WITHOUT_NUMBER;
-
-        return new NumberPart(firstPart, secondPart);
-      }
-    } else
-      return new NumberPart(NUM_PART, "");
-  }
 }
