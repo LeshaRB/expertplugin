@@ -18,15 +18,11 @@
     </dependencies>
 
     <properties>
-        <!-- define class name for the descriptor file -->
         <elasticsearch.plugin.classname>pro.redsoft.expert.ExpertPlugin</elasticsearch.plugin.classname>
     </properties>
 
     <build>
         <plugins>
-            <!-- ============================================================= -->
-            <!-- Elasticsearch is using java 1.7 at the moment.                -->
-            <!-- ============================================================= -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -36,9 +32,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <!-- ============================================================= -->
-            <!-- This plugin assembles plugin .zip package.                     -->
-            <!-- ============================================================= -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
