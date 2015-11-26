@@ -31,7 +31,7 @@ public class IssueNumberScript extends AbstractSearchScript {
     numberPart.setsUpdateDate(updateDate);
 
     String hash = numberPart.getHexEncode();
-    logger.info(hash);
+    // logger.info(hash);
 
     return hash;
   }
